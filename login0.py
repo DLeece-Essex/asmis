@@ -15,7 +15,7 @@ def getip():
 
 
 def newsessionid():
-    sessionid=''.join(random.choices(string.ascii_letters + string.digits,24))
+    sessionid=''.join(random.choices(string.ascii_letters + string.digits,k=24))
     return sessionid
 
 
