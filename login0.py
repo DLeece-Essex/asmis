@@ -18,8 +18,8 @@ def newsessionid():
     sessionid=''.join(random.choices(string.ascii_letters + string.digits,k=24))
     return sessionid
 
-def testusername(uname,sid):
-    failedlogins=getfailedlogincount(sid)
+def testusername(uname,sessionid):
+    failedlogins=getfailedlogincount(sessionid)
     if failedlogins > 5:
         print("Likley Malicious, reject session")
         return
@@ -29,7 +29,7 @@ def testusername(uname,sid):
         # Use set compression just like list, break test into two parts to make code easier to follow  
         badchars={c for c in uname if c not in charwhitelist}
         if badchars:
-            updatesessiontracker(sid)
+            updatesessiontracker(sessionid)
             return False
     return True
 
@@ -46,9 +46,10 @@ def getcredentials(thissession):
     # Check the username for malicious content prior to testing for password
     if validusername:
         print('checking if password is valid')
+        return True
         # if failed, second call to updatesessiontracker
-    # return a boolean, valid username and password
-    return (username,password)
+    # return false by default, only convert to true when valid uname & pwd
+    return False
 
 
 def newlogin():
@@ -80,8 +81,12 @@ if __name__ == "__main__":
     global sessiontracker
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
-    thissession = newlogin()
-
-    results=getcredentials(thissession)
-    print(results)
+    thissession = newlogin()   # session ID is the only reliable way to track individula users
+    validlogin=False
+    while not validlogin:
+        validlogin=getcredentials(thissession)
+        if validlogin:
+            print("now validate via MFA")
+        else:
+            print("Invalid user name or password")
 
