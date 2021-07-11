@@ -88,5 +88,7 @@ if __name__ == "__main__":
         if validlogin:
             print("now validate via MFA")
         else:
+            failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
+            print("You have " + str(6 - failedlogincount) + " attempts remaining")
 
