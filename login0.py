@@ -72,7 +72,7 @@ if __name__ == "__main__":
     global sessiontracker
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
-    thissession = newlogin(sessiontracker)
+    thissession = newlogin()
 
     results=getcredentials(thissession)
     print(results)
