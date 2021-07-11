@@ -60,13 +60,13 @@ def newlogin():
     updatesessiontracker(thissession)
     return thissession
 
-def updatesessiontracker(sid):
+def updatesessiontracker(sessionid):
     # track failures by session if
-    if sid in sessiontracker.keys():
-        previousfailures = sessiontracker['sid']
-        failedlogincount= sessiontracker['sid'] = previousfailures + 1
+    if sessionid in sessiontracker.keys():
+        previousfailures = sessiontracker[sessionid]
+        sessiontracker[sessionid] = previousfailures + 1
     else:
-        sessiontracker['sid']=0
+        sessiontracker[sessionid]=0
         #failedlogincount= sessiontracker['sid']
     return #failedlogincount
 
