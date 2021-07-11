@@ -1,7 +1,25 @@
 #!/usr/bin/env python
 # use stdiomask for better password UI experience
-import sys,socket,stdiomask, random, string
+import sys,socket,stdiomask, random, string, datetime
 
+
+
+def newsuspiciousactivity(sessionid,uname):
+    # Log format, 
+    # Timestamp Webserver-Hostname asmisprogram: Multiple failed authentication attemps for <sessionid> from <IP>
+    timestamp=datetime.datetime.now().isoformat("T","seconds")
+    thisip=getip
+    hostname="web1" # would capture hostname of computer reporting log
+    programid="ASMIS_Login[12345]" # would capture program name and PID
+    logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+            "Multiple failed authentication attempts for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
+    print("You appear to be having trouble logging in, please contact Queens Medical Centre at 1-800-555-1212 for assistance")
+    print("Goodbye\n")
+    print("------------- Security event monitoring control------------------- ")
+    print("The following suspicous active log will be forwared to Queens security monitoring services:")
+    print(logmessage)
+    exit(1)
+    return
 
 
 def getip():
@@ -21,7 +39,8 @@ def newsessionid():
 def testusername(uname,sessionid):
     failedlogins=getfailedlogincount(sessionid)
     if failedlogins > 5:
-        print("Likley Malicious, reject session")
+        newsuspiciousactivity(sessionid,uname)
+        #print("Likley Malicious, reject session")
         return
     else:
         charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
@@ -45,7 +64,7 @@ def getcredentials(thissession):
         print("This does not appear to be a command line interface")
     # Check the username for malicious content prior to testing for password
     if validusername:
-        print('checking if password is valid')
+        print('Control 2: checking if password is valid')
         return True
         # if failed, second call to updatesessiontracker
     # return false by default, only convert to true when valid uname & pwd
@@ -62,12 +81,12 @@ def newlogin():
     return thissession
 
 def updatesessiontracker(sessionid):
-    # track failures by session if
+    # track login attempts by session
     if sessionid in sessiontracker.keys():
         previousfailures = sessiontracker[sessionid]
         sessiontracker[sessionid] = previousfailures + 1
     else:
-        sessiontracker[sessionid]=0
+        sessiontracker[sessionid]=1
         #failedlogincount= sessiontracker['sid']
     return #failedlogincount
 
