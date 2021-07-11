@@ -18,53 +18,61 @@ def newsessionid():
     sessionid=''.join(random.choices(string.ascii_letters + string.digits,k=24))
     return sessionid
 
-
-def checkusername(uname,sid):
+def testusername(uname,sid):
     failedlogins=getfailedlogincount(sid)
     if failedlogins > 5:
         print("Likley Malicious, reject session")
         return
     else:
-        print("Check whitelisted characters in this username {}".format(uname))
-    return
+        charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
+        print("Control 1: Confirm only whitelisted characters are in the following username {}".format(uname))
+        # Use set compression just like list, break test into two parts to make code easier to follow  
+        badchars={c for c in uname if c not in charwhitelist}
+        if badchars:
+            updatesessiontracker(sid)
+            return False
+    return True
 
 
 def getcredentials(thissession):
     # only works via command line, warn & exit
     if sys.stdin.isatty():
         print("Welcome to ASMIS, please enter your username and password")
-        username = raw_input("Username: ")
+        username = input("Username: ")
         password = stdiomask.getpass(prompt='Password: ', mask='*')
-        checkusername(username,thissession)
+        validusername=testusername(username,thissession)
     else:
         print("This does not appear to be a command line interface")
     # Check the username for malicious content prior to testing for password
-    # return a tuple 
+    if validusername:
+        print('checking if password is valid')
+        # if failed, second call to updatesessiontracker
+    # return a boolean, valid username and password
     return (username,password)
 
 
 def newlogin():
-    # This function simulates 
+    # This function simulates the initial connection from an external source to HTTP server
     thissession=newsessionid()
     thisip=getip() # cant really use this yet
-    failcount=0
+    failcount=0 # Don't really need this either since it's 0 on a new login
     # update tracking
-    updatesessiontracker(thissession,failcount)
+    updatesessiontracker(thissession)
     return thissession
 
-def updatesessiontracker(sid,fc):
+def updatesessiontracker(sid):
     # track failures by session if
     if sid in sessiontracker.keys():
         previousfailures = sessiontracker['sid']
         failedlogincount= sessiontracker['sid'] = previousfailures + 1
     else:
-        sessiontracker['sid']=fc
-        failedlogincount= sessiontracker['sid']
-    return failedlogincount
+        sessiontracker['sid']=0
+        #failedlogincount= sessiontracker['sid']
+    return #failedlogincount
 
 
 def getfailedlogincount(sessionid):
-    return sessiontracker['sessionid']
+    return sessiontracker[sessionid]
 
 
 if __name__ == "__main__":
