@@ -8,7 +8,7 @@ def newsuspiciousactivity(sessionid,uname):
     # Log format, 
     # Timestamp Webserver-Hostname asmisprogram: Multiple failed authentication attemps for <sessionid> from <IP>
     timestamp=datetime.datetime.now().isoformat("T","seconds")
-    thisip=getip
+    thisip=getip()
     hostname="web1" # would capture hostname of computer reporting log
     programid="ASMIS_Login[12345]" # would capture program name and PID
     logmessage=timestamp + " " + hostname + " " + programid + ": " + \
@@ -74,11 +74,11 @@ def getcredentials(thissession):
 def newlogin():
     # This function simulates the initial connection from an external source to HTTP server
     thissession=newsessionid()
-    thisip=getip() # cant really use this yet
-    failcount=0 # Don't really need this either since it's 0 on a new login
+    # collect on initial connection for testing against global threat lists
+    thisip=getip() 
     # update tracking
     updatesessiontracker(thissession)
-    return thissession
+    return (thissession,thisip)
 
 def updatesessiontracker(sessionid):
     # track login attempts by session
@@ -87,8 +87,7 @@ def updatesessiontracker(sessionid):
         sessiontracker[sessionid] = previousfailures + 1
     else:
         sessiontracker[sessionid]=1
-        #failedlogincount= sessiontracker['sid']
-    return #failedlogincount
+    return
 
 
 def getfailedlogincount(sessionid):
@@ -100,7 +99,8 @@ if __name__ == "__main__":
     global sessiontracker
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
-    thissession = newlogin()   # session ID is the only reliable way to track individula users
+    thissession,thisip = newlogin()   # session ID is the only reliable way to track individula users
+    print("check this IP against global TI lists: " + thisip)
     validlogin=False
     while not validlogin:
         validlogin=getcredentials(thissession)
@@ -109,5 +109,5 @@ if __name__ == "__main__":
         else:
             failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
-            print("You have " + str(6 - failedlogincount) + " attempts remaining")
+            print("You have " + str(7 - failedlogincount) + " attempts remaining")
 
