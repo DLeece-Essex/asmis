@@ -29,12 +29,12 @@ def tesuserdata(recdict):
     nextrecord=True
     if sys.stdin.isatty():
         while nextrecord:
-        username = input("Username: ")
-        password = input("Password: ")
-        pwdhash=recdict[username][0]
-        if testpasswd(password,pwdhash):
-            print("the password for " + username + " is " + password)
-            nextrecord = input("test another account? True/False")
+            username = input("Username: ")
+            password = input("Password: ")
+            pwdhash=recdict[username][0]
+            if testpasswd(password,pwdhash):
+                print("the password for " + username + " is " + password)
+                nextrecord = input("test another account? True/False")
     return
 
         
