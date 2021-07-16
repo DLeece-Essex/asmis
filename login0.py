@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # use stdiomask for better password UI experience
-import sys,socket,stdiomask, random, string, datetime
+import sys,socket,stdiomask, random, string, datetime, bcrypt
 
 '''
 ReadMe:
