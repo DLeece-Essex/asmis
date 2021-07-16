@@ -40,10 +40,10 @@ def tesuserdata(recdict):
         
 
 def getuserdata():
-    nextrecord=True
+    nextrecord="yes"
     recdict=dict()
     if sys.stdin.isatty():
-        while nextrecord:
+        while nextrecord == "yes":
             print("Follow the prompts to create new user data.")
             username = input("Username: ")
             password = input("Password: ")
@@ -52,7 +52,7 @@ def getuserdata():
             rbacrole=input("Role, 1:user,2:mos,3:it")
             thisrecord=newrecord(username,passwordhash,smscontact,rbacrole,recdict)
             print(thisrecord)
-            nextrecord = input("Add another record? True/False ")
+            nextrecord = input("Add another record? yes/no")
     return recdict
 
 
