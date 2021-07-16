@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from sbx.asmis.login0 import testusername
 import bcrypt, sys, string, random, json
 
 # A basic prep script to make the data needed for the prototype.
@@ -12,32 +13,51 @@ def newpassword(passwdstr):
     passwdhash=bcrypt.hashpw(passwdbytes,salt)
     return passwdhash
 
+def testpasswd(pwdstr,pwdhash):
+    print(pwdhash)
+    result=bcrypt.checkpw(pwdstr,pwdhash)
 
-def newrecord(uname,pwd,contact,role):
-    tempdict= dict()
+    return result
+
+def newrecord(uname,pwd,contact,role,recdict):
+    #tempdict= dict()
     datalist = [pwd,contact,role]
-    tempdict[uname]=datalist
-    return tempdict
+    recdict[uname]=datalist
+    return recdict
 
+def tesuserdata(recdict):
+    nextrecord=True
+    if sys.stdin.isatty():
+        while nextrecord:
+        username = input("Username: ")
+        password = input("Password: ")
+        pwdhash=recdict[username][0]
+        if testpasswd(password,pwdhash):
+            print("the password for " + username + " is " + password)
+            nextrecord = input("test another account? True/False")
+    return
+
+        
 
 def getuserdata():
     nextrecord=True
+    recdict=dict()
     if sys.stdin.isatty():
-        while newpassword:
+        while nextrecord:
             print("Follow the prompts to create new user data.")
             username = input("Username: ")
             password = input("Password: ")
             passwordhash=newpassword(password)
             smscontact=input("SMS contact number:")
             rbacrole=input("Role, 1:user,2:mos,3:it")
-            thisrecord=newrecord(username,passwordhash,smscontact,rbacrole)
+            newrecord(username,passwordhash,smscontact,rbacrole,recdict)
             print(thisrecord)
             nextrecord = input("Add another record? True/False ")
-    return
+    return recdict
 
 
-        
-
+    
 
 if __name__ == "__main__":
-    getuserdata()
+    thisrecset=getuserdata()
+    tesuserdata(thisrecset)
