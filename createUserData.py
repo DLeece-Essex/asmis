@@ -15,7 +15,8 @@ def newpassword(passwdstr):
 
 def testpasswd(pwdstr,pwdhash):
     print(pwdhash)
-    result=bcrypt.checkpw(pwdstr,pwdhash)
+    passwdbytes=bytes(pwdstr,'utf-8')
+    result=bcrypt.checkpw(passwdbytes,pwdhash)
 
     return result
 
@@ -33,7 +34,6 @@ def tesuserdata(recdict):
             username = input("Username: ")
             password = input("Password: ")
             pwdhash=recdict[username][0]
-            passwdbytes=bytes(password,'utf-8')
             if testpasswd(password,pwdhash):
                 print("the password for " + username + " is " + password)
                 nextrecord = input("test another account? True/False")
