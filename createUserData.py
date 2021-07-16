@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sbx.asmis.login0 import testusername
+
 import bcrypt, sys, string, random, json
 
 # A basic prep script to make the data needed for the prototype.
@@ -50,7 +50,7 @@ def getuserdata():
             passwordhash=newpassword(password)
             smscontact=input("SMS contact number:")
             rbacrole=input("Role, 1:user,2:mos,3:it")
-            newrecord(username,passwordhash,smscontact,rbacrole,recdict)
+            thisrecord=newrecord(username,passwordhash,smscontact,rbacrole,recdict)
             print(thisrecord)
             nextrecord = input("Add another record? True/False ")
     return recdict
