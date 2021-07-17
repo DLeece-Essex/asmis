@@ -88,10 +88,13 @@ def testusername(uname,sessionid):
     return True
 
 def testpassword(username,password):
-    pwdhashstr= recordsdictionary[username][0]
-    passwdbytes=bytes(password,'utf-8')
-    pwdhash=bytes(pwdhashstr,'utf-8')
-    result=bcrypt.checkpw(passwdbytes,pwdhash)
+    try:
+        pwdhashstr= recordsdictionary[username][0]
+        passwdbytes=bytes(password,'utf-8')
+        pwdhash=bytes(pwdhashstr,'utf-8')
+        result=bcrypt.checkpw(passwdbytes,pwdhash)
+    except KeyError:
+        return False
     return result
 
 def getcredentials(thissession):
