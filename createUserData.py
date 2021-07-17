@@ -11,11 +11,14 @@ def newpassword(passwdstr):
     salt=bcrypt.gensalt()
     passwdbytes=bytes(passwdstr,'utf-8')
     passwdhash=bcrypt.hashpw(passwdbytes,salt)
-    return passwdhash
+    # use decode to convert to string for storage
+    passwdhashstr = passwdhash.decode()
+    return passwdhashstr
 
-def testpasswd(pwdstr,pwdhash):
-    print(pwdhash)
+def testpasswd(pwdstr,pwdhashstr):
+    print(pwdhashstr)
     passwdbytes=bytes(pwdstr,'utf-8')
+    pwdhash=bytes(pwdhashstr,'utf-8')
     result=bcrypt.checkpw(passwdbytes,pwdhash)
 
     return result
@@ -33,8 +36,8 @@ def tesuserdata(recdict):
             print("Checking passwords")
             username = input("Username: ")
             password = input("Password: ")
-            pwdhash=recdict[username][0]
-            if testpasswd(password,pwdhash):
+            pwdhashstr=recdict[username][0]
+            if testpasswd(password,pwdhashstr):
                 print("the password for " + username + " is " + password)
                 nextrecord = input("test another account? True/False")
             else:
@@ -52,10 +55,10 @@ def getuserdata():
             print("Follow the prompts to create new user data.")
             username = input("Username: ")
             password = input("Password: ")
-            passwordhash=newpassword(password)
+            passwordhashstr=newpassword(password)
             smscontact=input("SMS contact number:")
             rbacrole=input("Role, 1:user,2:mos,3:it")
-            thisrecord=newrecord(username,passwordhash,smscontact,rbacrole,recdict)
+            thisrecord=newrecord(username,passwordhashstr,smscontact,rbacrole,recdict)
             print(thisrecord)
             nextrecord = input("Add another record? yes/no")
     return recdict
