@@ -79,7 +79,7 @@ def testusername(uname,sessionid):
         newsuspiciousactivity(sessionid,uname)
     else:
         charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
-        print("Control 1: Confirm only whitelisted characters are in the following username {}".format(uname))
+        #print("Control 1: Confirm only whitelisted characters are in the following username {}".format(uname))
         message="Control 1: Confirm only whitelisted characters are in the following username {}".format(uname)
         controldisplay(message)
         # Use set compression just like list, break test into two parts to make code easier to follow  
@@ -152,7 +152,7 @@ def controldisplay(message):
     print(message)
     time.sleep(1)
     for count in range(4):
-        print("...........",end=None)
+        print("...........",sep='',end='')
         time.sleep(.5)
     print("\n")
     return
@@ -171,6 +171,8 @@ if __name__ == "__main__":
         validlogin=getcredentials(thissession)
         if validlogin:
             print("now validate via MFA")
+            message="Control 3: Multifactor authentication using stored data"
+            controldisplay(message)
         else:
             failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
