@@ -60,9 +60,17 @@ def getuserdata():
             nextrecord = input("Add another record? yes/no")
     return recdict
 
+def storeuserdata(recdict):
+    with open ('user_data.txt','w') as fh:
+        json.dump(recdict,fh)
+    return
+
+
 
     
 
 if __name__ == "__main__":
-    thisrecset=getuserdata()
+    thisrecset=getuserdata() 
+    # Save data to a file
+    storeuserdata(thisrecset)
     tesuserdata(thisrecset)
