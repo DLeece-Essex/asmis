@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # use stdiomask for better password UI experience
-import sys,socket,stdiomask, random, string, datetime, bcrypt
+import sys,socket,stdiomask, random, string, datetime, bcrypt,  time
 
 '''
 ReadMe:
@@ -80,6 +80,8 @@ def testusername(uname,sessionid):
     else:
         charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
         print("Control 1: Confirm only whitelisted characters are in the following username {}".format(uname))
+        message="Control 1: Confirm only whitelisted characters are in the following username {}".format(uname)
+        controldisplay(message)
         # Use set compression just like list, break test into two parts to make code easier to follow  
         badchars={c for c in uname if c not in charwhitelist}
         if badchars:
@@ -108,7 +110,10 @@ def getcredentials(thissession):
         print("This does not appear to be a command line interface")
     # Check the username for malicious content prior to testing for password
     if validusername:
-        print('Control 2: checking if password is valid')
+        #print('Control 2: checking if password is valid')
+        message='Control 2: checking if password is valid'
+        controldisplay(message)
+        
         validpassword = testpassword(username,password)
         if validpassword:
             return True
@@ -141,6 +146,16 @@ def updatesessiontracker(sessionid):
 def getfailedlogincount(sessionid):
     return sessiontracker[sessionid]
 
+def controldisplay(message):
+    print("\n--------------Control Check---------------------------")
+    time.sleep(1)
+    print(message)
+    time.sleep(1)
+    for count in range(4):
+        print("...........",end=None)
+        time.sleep(.5)
+    print("\n")
+    return
 
 if __name__ == "__main__":
     # track active sessions for failed logins
@@ -148,7 +163,9 @@ if __name__ == "__main__":
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
     thissession,thisip = newlogin()   # session ID is the only reliable way to track individula users
-    print("check this IP against global TI lists: " + thisip)
+    message= "Control 0: check this IP against global TI lists: " + thisip
+    controldisplay(message)
+    #print("check this IP against global TI lists: " + thisip)
     validlogin=False
     while not validlogin:
         validlogin=getcredentials(thissession)
