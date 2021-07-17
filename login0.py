@@ -152,8 +152,8 @@ def controldisplay(message):
     print(message)
     time.sleep(1)
     for count in range(4):
-        print("...........",sep='',end='')
-        time.sleep(.5)
+        print("...........",sep='>',end='')
+        time.sleep(1)
     print("\n")
     return
 
