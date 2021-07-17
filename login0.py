@@ -109,6 +109,8 @@ def getcredentials(thissession):
         validpassword = testpassword(username,password)
         if validpassword:
             return True
+        else:
+            updatesessiontracker(thissession)
     # return false by default, only convert to true when valid uname & pwd
     return False
 
