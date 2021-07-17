@@ -16,7 +16,9 @@ application load by avoiding needlessly validating untrusted source input data t
 almost certainly intended to attack the system.  
 '''
 
-# User account database data
+# User account database data 
+
+recordsdictionary={"bsmith": ["$2b$12$rTifUwwl51c.rO7KJfmIfuVzRQI0UsVF5/w1vGSDAsWPqqfZ3XFBe", "1-403-585-9161", "1"], "svaughan": ["$2b$12$.yeAq7MlJA1JUTa7XUGXMegCQ1dowifmMRaQeyilpQl9EK7dBhtV2", "1-889-234-8967", "3"], "wchandy": ["$2b$12$V3NnvyyM3Tv9YJmKLTskPOyB/JeRI0Yxhm.n1QqR9vy1/.jqn71b.", "1-345-893-7829", "2"]}
 
 
 # Global threat IP reputation list ( add local RFC 1918  address of test machine to validate)
@@ -85,6 +87,12 @@ def testusername(uname,sessionid):
             return False
     return True
 
+def testpassword(username,password):
+    pwdhashstr= recordsdictionary[username][0]
+    passwdbytes=bytes(password,'utf-8')
+    pwdhash=bytes(pwdhashstr,'utf-8')
+    result=bcrypt.checkpw(passwdbytes,pwdhash)
+    return result
 
 def getcredentials(thissession):
     # only works via command line, warn & exit
@@ -98,8 +106,9 @@ def getcredentials(thissession):
     # Check the username for malicious content prior to testing for password
     if validusername:
         print('Control 2: checking if password is valid')
-        return True
-        # if failed, second call to updatesessiontracker
+        validpassword = testpassword(username,password)
+        if validpassword:
+            return True
     # return false by default, only convert to true when valid uname & pwd
     return False
 
