@@ -251,7 +251,7 @@ def getuserrbac(username):
     except ValueError:
         rbaccode=99
         pass
-    
+
     if rbaccode==1:
         message="Control 5: Identified access role assigned for the user {} is patient".format(username)
     elif rbaccode==2:
@@ -295,7 +295,6 @@ def newrbacmenu(role,username,sessionid,sessiondb):
             print("Thank you for using the Queens Medical Center Appointment Management System")
             print("Goodbye")
             asmismenu=False
-            exit(1)
         else:
             print("this application feature is not currently enabled, please try again later or contact Queens Medical Centre at 1-800-555-1212 for assistance ")
             continue
@@ -307,11 +306,11 @@ def newmenuheader(role,username):
     # Predefined menu based on role assigned to user, default is no application access
     if role==1:
         menu="1: Schedule new appointment\n2: List current appointments\n3: Change an upcomming appointment\n4: Cancel an appointment\n5: Exit Queens Medical Center Appointment Management System\n"
-    if role==2:
+    elif role==2:
         menu="1: List specialist avalibility\n2: New patient appointment\n3: Change/Cancel patient appointment\n4: Update patient record\n5: Exit Queens Medical Center Appointment Management System\n"
-    if role==3:
+    elif role==3:
         menu="1: List my current appointments\n2: Review/Update patient notes\n3: Update my availability\n4: Cancel an appointment\n5: Exit Queens Medical Center Appointment Management System\n"
-    if role==4:
+    elif role==4:
         menu="1: Create/Update/Delete MOS account\n2: Create/Update/Delete MED account\n5: Exit Queens Medical Center Appointment Management System\n"
     else:
         menu="5: Exit Queens Medical Center Appointment Management System\n"
