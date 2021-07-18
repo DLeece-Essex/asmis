@@ -278,11 +278,11 @@ def getuserrbac(username,sessionid):
     controldisplay(message)
     return rbaccode
 
-def newrbacmenu(role,username,sessionid,sessiondb):
+def newrbacmenu(role,username,sessionid):
     message="Control 5.1: Access to application requires valid authentication. This status will be tracked with session identifier {}".format(sessionid)
     controldisplay(message)
     # Exit application early and do not present a menu.
-    if sessionid in sessiondb.keys():
+    if sessionid in sessiontracker.keys():
         validsession=True
     else:
         print("session identifier {} has expired, please login again.".format(sessionid))
@@ -365,7 +365,7 @@ if __name__ == "__main__":
     # Limit menu functionality to users who have successfully met MFA, end program when they exit the menu
     if eneablemenu:
         rbacrole=getuserrbac(validlogin[1],thissession)
-        newrbacmenu(rbacrole,validlogin[1],thissession,sessiontracker)
+        newrbacmenu(rbacrole,validlogin[1],thissession)
         eneablemenu=False
         # Record user logging out and track session termination
         logdata=getlogheader("app1","ASMIS_Menu[12345]",thissession)
