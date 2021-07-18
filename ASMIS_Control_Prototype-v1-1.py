@@ -129,17 +129,21 @@ def newfailedlogin(sessionid,username):
     return
 
 # Application security related functions
-def testusername(uname,sessionid):
+def testusername(username,sessionid):
     failedlogins=getfailedlogincount(sessionid)
     if failedlogins > 5:
-        newsuspiciousactivity(sessionid,uname)
+        newsuspiciousactivity(sessionid,username)
     else:
         charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
-        message="Control 1: Confirm only whitelisted characters are in the following username {}".format(uname)
+        message="Control 1: Confirm only whitelisted characters are in the following username {}".format(username)
         controldisplay(message)
         # Use set compression just like list, break test into two parts to make code easier to follow  
-        badchars={c for c in uname if c not in charwhitelist}
+        badchars={c for c in username if c not in charwhitelist}
         if badchars:
+            updatesessiontracker(sessionid)
+            return False
+        # Reject empty username field
+        if len(username) < 1:
             updatesessiontracker(sessionid)
             return False
     return True
@@ -317,7 +321,7 @@ if __name__ == "__main__":
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
     thissession,thisip = newlogin()   # session ID is the only reliable way to track individula users
-    message= "Control 0: Check this IP {} against global TI lists".format(thisip)
+    message= "Control 0: Check this IP {} against global Threat Intelligence lists".format(thisip)
     controldisplay(message)
     # Initialize key control variables to the correct state prior to use.
     validlogin=[False,'']
