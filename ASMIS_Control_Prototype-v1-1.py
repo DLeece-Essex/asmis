@@ -275,7 +275,7 @@ def newrbacmenu(role,username,sessionid,sessiondb):
     # Track user activity within the application
     controldisplay(message)
     logdata=getlogheader("app1","ASMIS_Menu[12345]",sessionid)
-    logmessage=logdata +" ASMIS session started for username {}".format(username)
+    logmessage=logdata +" ASMIS session started for username {} assigned RBAC role {}".format(username,role)
     print("------------- Security event monitoring control------------------- ")
     print("The following application activity will be forwarded to Queens security monitoring services:")
     print(logmessage)
