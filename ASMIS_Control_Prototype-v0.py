@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # use stdiomask for better password UI experience
 import sys,socket,stdiomask, random, string, datetime, bcrypt,  time, random
+from cryptography.fernet import Fernet
 
 '''
 ReadMe:
@@ -17,8 +18,6 @@ almost certainly intended to attack the system.
 '''
 
 # User account database data 
-
-#recordsdictionary={"bsmith": ["$2b$12$rTifUwwl51c.rO7KJfmIfuVzRQI0UsVF5/w1vGSDAsWPqqfZ3XFBe", "1-403-585-9161", "1"], "svaughan": ["$2b$12$.yeAq7MlJA1JUTa7XUGXMegCQ1dowifmMRaQeyilpQl9EK7dBhtV2", "1-889-234-8967", "3"], "wchandy": ["$2b$12$V3NnvyyM3Tv9YJmKLTskPOyB/JeRI0Yxhm.n1QqR9vy1/.jqn71b.", "1-345-893-7829", "2"]}
 recordsdictionary={\
     "bsmith": ["$2b$12$Me7cJkoqN0ya8Jh6NQOqHeDWlZ55xzffxQu5VOUPiNZ1OqekBKKUi", "gAAAAABg81k4KZcGxf4waRbGonV0QDcRwXVRba-QDP-5Y205sm2zfg23GPfnecLmyzLQeOiypP0MgsY5CBpqThIDanSVdo9BAA==", "1"],\
         "wchandy": ["$2b$12$caHEQ4FGG41DGYcT8z5NYe9deowfJhmeCdhqFYiMVLMGb5BbHsWFq", "gAAAAABg81l3ILWRjuPd7zPY48A9qT_k86VKAV0A7GKIIjsCOLKKailUhH_2tExtm_9h51agyreIE02bTSqLGfoyQ45tdWEglQ==", "2"],\
@@ -32,10 +31,7 @@ recordsdictionary={\
 #####################################################
 
 
-
-
 # Network Security related functions
-
 # Global threat IP reputation list ( add local RFC 1918  address of test machine to validate)
 ipreputationlist=["202.192.34.106","138.197.141.172","121.74.25.77","49.233.155.23","45.227.255.204","221.131.165.56","211.219.29.107","115.79.200.221","72.94.165.10","40.88.4.73","34.89.123.155","185.202.1.175","180.106.148.221","162.243.102.191","107.182.17.174","95.140.118.44","141.98.10.179","34.71.20.225","81.68.184.218","74.94.31.141","197.237.174.178","51.158.107.168","45.146.165.72","211.252.87.42","203.151.39.4","61.177.173.30","222.186.30.112","116.87.198.111","182.23.23.42","180.76.105.122","155.133.11.242","206.130.141.138","189.173.133.18","188.166.22.79","168.196.96.37","3.10.227.68","203.20.148.87","42.193.110.250","161.35.112.155","140.250.55.53","107.189.30.250","107.155.15.62","210.72.91.6","172.105.254.10","159.65.149.54","49.232.221.113","31.154.169.242","177.10.105.143","167.71.170.179"]
 
@@ -53,7 +49,6 @@ def testsourceip(thisip):
         exit(1)
     return
 
-
 def getip():
     # use an RFC 1918 address, plant fake address if only loop back found
     s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -65,7 +60,6 @@ def getip():
 
 
 # Encryption related functions
-
 def getsecrets():
     message=("Control 3: Retrieving application data decryption key from Secrets Manager application" )
     controldisplay(message)
@@ -81,7 +75,6 @@ def decryptdata(key,datastr):
     return clearbytes.decode()
 
 # Security monitoring functions
-
 def newsessionid():
     sessionid=''.join(random.choices(string.ascii_letters + string.digits,k=24))
     return sessionid
@@ -116,7 +109,6 @@ def newsuspiciousactivity(sessionid,uname):
     return
 
 # Application security related functions
-
 def testusername(uname,sessionid):
     failedlogins=getfailedlogincount(sessionid)
     if failedlogins > 5:
@@ -144,7 +136,7 @@ def testpassword(username,password):
     return result
 
 def getsmscontact(username,key):
-    message("Control 3.1: Decrypting user contact information")
+    message="Control 3.1: Decrypting user contact information"
     controldisplay(message)
     enccontact=recordsdictionary[username][1]
     smscontact=decryptdata(key,enccontact)
@@ -158,11 +150,7 @@ def newsmsmessage(smscontact):
     return mfacode
 
 
-
-
-
 # program flow functions
-
 def getcredentials(thissession):
     # only works via command line, warn & exit
     if sys.stdin.isatty():
@@ -184,7 +172,6 @@ def getcredentials(thissession):
     # return false by default, only convert to true when valid uname & pwd
     return [False,username]
 
-
 def newlogin():
     # This function simulates the initial connection from an external source to HTTP server
     thissession=newsessionid()
@@ -199,10 +186,9 @@ def controldisplay(message):
     print("\n--------------Control Check---------------------------")
     time.sleep(1)
     print(message)
-    time.sleep(1)
-    for count in range(4):
-        print("...........",sep='>',end='')
-        time.sleep(1)
+    for count in range(3):
+        print("...........")
+        time.sleep(count)
     print("\n")
     return
 
@@ -235,4 +221,3 @@ if __name__ == "__main__":
             failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
             print("You have " + str(7 - failedlogincount) + " attempts remaining")
-
