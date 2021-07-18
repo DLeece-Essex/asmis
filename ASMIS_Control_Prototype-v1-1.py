@@ -214,7 +214,7 @@ def controldisplay(message):
         time.sleep(count)
     return
 
-def mfacodeprompt(mfacode,sessionid):
+def mfacodeprompt(mfacode,sessionid,sessiondb):
     failcount=0
     while failcount < 6:
         # using third party module for the timer
@@ -230,9 +230,9 @@ def mfacodeprompt(mfacode,sessionid):
                 pass
         else:
             print("MFA code incorrect or expired")
-            deletesession(sessionid)
+            deletesession(sessionid,sessiondb)
             failcount=6
-    deletesession(sessionid)    
+    deletesession(sessionid,sessiondb)    
     return False
 
 def getuserrbac(username,sessionid):
@@ -336,7 +336,7 @@ if __name__ == "__main__":
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
             # Start a while loop and wait for 120 seconds, if no match exit, write failed MFA login to log
-            mfaresult=mfacodeprompt(mfacode,thissession)
+            mfaresult=mfacodeprompt(mfacode,thissession,sessiontracker)
             if mfaresult:
                 eneablemenu=True
                 break
