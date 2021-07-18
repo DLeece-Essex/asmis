@@ -202,8 +202,8 @@ if __name__ == "__main__":
     message= "Control 0: check this IP against global TI lists: " + thisip
     controldisplay(message)
     #print("check this IP against global TI lists: " + thisip)
-    validlogin=False
-    while not validlogin:
+    validlogin=[False,'']
+    while not validlogin[0]:
         validlogin=getcredentials(thissession)
         if validlogin[0]:
             # To retrieve the SMS contact associated with the valid username it must be decrypted 
