@@ -322,6 +322,6 @@ if __name__ == "__main__":
     if eneablemenu:
         print("MFA valid so now get RBAC code and present menu")
         rbacrole=getuserrbac(validlogin[1])
-        newrbacmenu(rbacrole, thissession)
+        newrbacmenu(rbacrole,validlogin[1],thissession)
     
     
