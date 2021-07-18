@@ -187,7 +187,7 @@ def controldisplay(message):
     time.sleep(1)
     print(message)
     for count in range(3):
-        print("...........")
+        print("..........." * count)
         time.sleep(count)
     return
 
@@ -214,7 +214,10 @@ if __name__ == "__main__":
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
             # Start a while loop and wait for 120 seconds, if no match exi t, write failed MFA login to log
-            
+            timer=120
+            #while timer > 0:
+            #    mfaresponse = input("Username: ")
+
             
         else:
             failedlogincount=getfailedlogincount(thissession)
