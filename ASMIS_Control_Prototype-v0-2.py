@@ -89,8 +89,25 @@ def updatesessiontracker(sessionid):
         sessiontracker[sessionid]=1
     return
 
+def deletesession(sessionid,sessiondatabase):
+    message="Control 5.2: Active session identifier {} destroyed to force reauthentication prior to permitting application access"
+    sessiondatabase.pop(sessionid)
+    controldisplay(message)
+    return
+
 def getfailedlogincount(sessionid):
     return sessiontracker[sessionid]
+
+def getlogheader(hostname,programid,sessionid):
+    # Log format, 
+    # Timestamp Webserver-Hostname asmisprogram: Multiple failed authentication attemps for <sessionid> from <IP>
+    timestamp=datetime.datetime.now().isoformat("T","seconds")
+    thisip=getip()
+    thishostname=hostname
+    thisprogramid=programid
+    thissessionid= sessionid
+    logdata=timestamp + " " + thishostname + " " + thisprogramid + ": session {} from source ip {} ".format(thissessionid,thisip)
+    return logdata
 
 def newsuspiciousactivity(sessionid,uname):
     # Log format, 
@@ -215,7 +232,6 @@ def mfacodeprompt(mfacode):
         if not timedOut:
             try:
                 if int(mfaresponse)==mfacode:
-                    print('correct mfa code')
                     return True
                 else:
                     print("MFA code incorrect")
@@ -228,7 +244,8 @@ def mfacodeprompt(mfacode):
     return False
 
 def getuserrbac(username):
-    rbaccode=recordsdictionary[username][2]
+    rbaccodestr=recordsdictionary[username][2]
+    rbaccode=int(rbaccodestr)
     if rbaccode==1:
         message="Control 5: Identified access role assigned for the user {} is patient".format(username)
     elif rbaccode==2:
@@ -252,12 +269,21 @@ def getuserrbac(username):
     controldisplay(message)
     return
 
-def newrbacmenu(role,username,sessionid):
-    message="Control 5.1: Access to application functions predefined for each role, HTTP state tracked with session identifier {}".format(sessionid)
+def newrbacmenu(role,username,sessionid,sessiondb):
+    message="Control 5.1: Access to application requires valid authentication. This status will be tracked with session identifier {}".format(sessionid)
     controldisplay(message)
-    asmismenu=True
-    while asmismenu:
-        newmenuheader(role,username)
+    # Exit application early and do not present a menu.
+    if sessionid in sessiondb.keys():
+        validsession=True
+    else:
+        print("session identifier {} has expired, please login again.".format(sessionid))
+        return
+    # once session is confirmed valid create the menu based on RBAC role
+    asmismenu=True  
+    message="Control 5.2: Access to application functions predefined for each role, using the following RBAC identifier {}".format(role)
+    controldisplay(message)
+    while asmismenu and validsession:
+        print(newmenuheader(role,username))
         menuprompt=input("Menu option: ")
         if menuprompt=="5":
             print("Thank you for using the Queens Medical Center Appointment Management System")
@@ -268,7 +294,6 @@ def newrbacmenu(role,username,sessionid):
             print("this application feature is not currently enabled, please try again later or contact Queens Medical Centre at 1-800-555-1212 for assistance ")
             continue
     return
-
 
 def newmenuheader(role,username):
     header="\n############ Queens Medical Center Appointment Management System ############\n"
@@ -318,10 +343,17 @@ if __name__ == "__main__":
             failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
             print("You have " + str(7 - failedlogincount) + " attempts remaining")
-    # Limit menu functionality to users who have successfully met MFA
+    # Limit menu functionality to users who have successfully met MFA, end program when they exit the menu
     if eneablemenu:
-        print("MFA valid so now get RBAC code and present menu")
         rbacrole=getuserrbac(validlogin[1])
-        newrbacmenu(rbacrole,validlogin[1],thissession)
-    
-    
+        newrbacmenu(rbacrole,validlogin[1],thissession,sessiontracker)
+        eneablemenu=False
+        # Log this condition of user with unassigned role
+        logdata=getlogheader("app1","ASMIS_Menu[12345]",thissession)
+        logmessage=logdata +" ASMIS session completed for username {}".format(validlogin[1])
+        print("------------- Security event monitoring control------------------- ")
+        print("The following application activity will be forwarded to Queens security monitoring services:")
+        print(logmessage)
+        deletesession(thissession,sessiontracker)
+        print("\n################ ASMIS control prototype complete ################")
+        exit(0)    
