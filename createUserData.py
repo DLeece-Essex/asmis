@@ -25,7 +25,7 @@ def newpassword(passwdstr):
 def encryptdata(key,data):
     # Ensure key & data are bytes, not strings
     encryptor=Fernet(key)
-    encdata=encryptor.encrypt(key,data)
+    encdata=encryptor.encrypt(data)
     # convert encrypted data to string for storage
     return encdata.decode()
 
@@ -85,7 +85,7 @@ def getuserdata(keylist):
             smscontact=input("SMS contact number:")
             smscontactbytes=bytes(smscontact,'utf-8')
             enccontact=encryptdata(keylist[0],smscontactbytes)
-            rbacrole=input("Role, 1:user,2:mos,3:it")
+            rbacrole=input("Role, 1:user,2:mos,3:med,4:it")
             thisrecord=newrecord(username,passwordhashstr,enccontact,rbacrole,recdict)
             print(thisrecord)
             nextrecord = input("Add another record? yes/no")
