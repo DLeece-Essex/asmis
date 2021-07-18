@@ -346,8 +346,9 @@ if __name__ == "__main__":
                 newfailedlogin(thissession,validlogin[1])
         else:
             failedlogincount=getfailedlogincount(thissession)
+            print("------------------ user message -----------------")
             print("Invalid user name or password")
-            print("You have " + str(7 - failedlogincount) + " attempts remaining")
+            print("You have {} attempts remaining\n".format(str(7 -failedlogincount)))
     # Limit menu functionality to users who have successfully met MFA, end program when they exit the menu
     if eneablemenu:
         rbacrole=getuserrbac(validlogin[1],thissession)
