@@ -2,6 +2,7 @@
 # use stdiomask for better password UI experience
 import sys,socket,stdiomask, random, string, datetime, bcrypt,  time, random
 from cryptography.fernet import Fernet
+from pytimedinput import timedInput
 
 '''
 ReadMe:
@@ -103,7 +104,22 @@ def newsuspiciousactivity(sessionid,uname):
     print("You appear to be having trouble logging in, please contact Queens Medical Centre at 1-800-555-1212 for assistance")
     print("Goodbye\n")
     print("------------- Security event monitoring control------------------- ")
-    print("The following suspicous active log will be forwared to Queens security monitoring services:")
+    print("The following suspicous activity log will be forwared to Queens security monitoring services:")
+    print(logmessage)
+    exit(1)
+    return
+
+def newfailedlogin(sessionid,uname):
+    timestamp=datetime.datetime.now().isoformat("T","seconds")
+    thisip=getip()
+    hostname="web1" # would capture hostname of computer reporting log
+    programid="ASMIS_Login[12345]" # would capture program name and PID
+    logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+        "Multifactor authentication failure for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
+    print("Please retry the multifactor authentication, if problems persist contact Queens Medical Centre at 1-800-555-1212 for assistance")
+    print("Goodbye\n")
+    print("------------- Security event monitoring control------------------- ")
+    print("The following suspicous activity log will be forwared to Queens security monitoring services:")
     print(logmessage)
     exit(1)
     return
@@ -191,6 +207,26 @@ def controldisplay(message):
         time.sleep(count)
     return
 
+def mfacodeprompt(mfacode):
+    failcount=0
+    while failcount < 6:
+        # using third party module for the timer
+        mfaresponse,timedOut=timedInput("MFA code (6 digits): ",30,True,6)
+        if not timedOut:
+            try:
+                if int(mfaresponse)==mfacode:
+                    print('correct mfa code')
+                    return True
+                else:
+                    print("MFA code incorrect")
+                    failcount = failcount + 1
+            except ValueError:
+                pass
+        else:
+            print("MFA code incorrect or expired")
+            failcount=6    
+    return False
+
 
 if __name__ == "__main__":
     # track active sessions for failed logins
@@ -208,17 +244,16 @@ if __name__ == "__main__":
             # To retrieve the SMS contact associated with the valid username it must be decrypted 
             keylist=getsecrets()
             smscontact=getsmscontact(validlogin[1],keylist[1])
-
-            print("now validate via MFA")
             message="Control 4: Multifactor authentication using stored data for useraccount {} ".format(validlogin[1])
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
             # Start a while loop and wait for 120 seconds, if no match exi t, write failed MFA login to log
-            timer=120
-            #while timer > 0:
-            #    mfaresponse = input("Username: ")
-
-            
+            mfaresult=mfacodeprompt(mfacode)
+            if mfaresult:
+                print("MFA valid so now get RBAC code and present menu")
+                break
+            else:
+                newfailedlogin(thissession,validlogin[1])
         else:
             failedlogincount=getfailedlogincount(thissession)
             print("Invalid user name or password")
