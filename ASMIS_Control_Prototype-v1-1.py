@@ -271,16 +271,16 @@ def newrbacmenu(role,username,sessionid,sessiondb):
     message="Control 5.2: Access to application functions predefined for each role, using the following RBAC identifier {}".format(role)
     controldisplay(message)
 
+    message="Control 6: Certain  user actions within the application should be logged such as logging in and logging out, changing or deleting records etc. User {} has successfully logged in and is assigned RBAC role {}".format(username,role)
+    # Track user activity within the application
+    controldisplay(message)
+    logdata=getlogheader("app1","ASMIS_Menu[12345]",sessionid)
+    logmessage=logdata +" ASMIS session started for username {}".format(username)
+    print("------------- Security event monitoring control------------------- ")
+    print("The following application activity will be forwarded to Queens security monitoring services:")
+    print(logmessage)
 
     while asmismenu and validsession:
-        message="Control 6: Certain  user actions within the application should be logged such as logging in and logging out, changing or deleting records etc. User {} has successfully logged in and is assigned RBAC role {}".format(username,role)
-        # Track user activity within the application
-        logdata=getlogheader("app1","ASMIS_Menu[12345]",sessionid)
-        logmessage=logdata +" ASMIS session started for username {}".format(username)
-        print("------------- Security event monitoring control------------------- ")
-        print("The following application activity will be forwarded to Queens security monitoring services:")
-        print(logmessage)
-        #
         print(newmenuheader(role,username))
         menuprompt=input("Menu option: ")
         if menuprompt=="5":
@@ -315,9 +315,9 @@ if __name__ == "__main__":
     sessiontracker = dict()
     # set up the first login, simulates a new HTTP connection from a client device
     thissession,thisip = newlogin()   # session ID is the only reliable way to track individula users
-    message= "Control 0: check this IP against global TI lists: " + thisip
+    message= "Control 0: Check this IP {} against global TI lists".format(thisip)
     controldisplay(message)
-    #print("check this IP against global TI lists: " + thisip)
+    # Initialize key control variables to the correct state prior to use.
     validlogin=[False,'']
     eneablemenu=False
     while not validlogin[0]:
@@ -329,7 +329,7 @@ if __name__ == "__main__":
             message="Control 4: Multifactor authentication using stored data for useraccount {} ".format(validlogin[1])
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
-            # Start a while loop and wait for 120 seconds, if no match exi t, write failed MFA login to log
+            # Start a while loop and wait for 120 seconds, if no match exit, write failed MFA login to log
             mfaresult=mfacodeprompt(mfacode)
             if mfaresult:
                 eneablemenu=True
@@ -345,7 +345,7 @@ if __name__ == "__main__":
         rbacrole=getuserrbac(validlogin[1],thissession)
         newrbacmenu(rbacrole,validlogin[1],thissession,sessiontracker)
         eneablemenu=False
-        # Log this condition of user with unassigned role
+        # Record user logging out and track session termination
         logdata=getlogheader("app1","ASMIS_Menu[12345]",thissession)
         logmessage=logdata +" ASMIS session completed for username {}".format(validlogin[1])
         print("------------- Security event monitoring control------------------- ")
