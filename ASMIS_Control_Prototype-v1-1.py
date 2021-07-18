@@ -6,16 +6,26 @@ from pytimedinput import timedInput
 
 '''
 ReadMe:
-To enable the entire simulation through a single python script the following data
-must be prepopulated in the data structures below. 
+To enable the entire simulation through a single python script the following data must 
+be prepopulated in the data structures below. 
 
-User account database records will contain usernames,salted passwords, SMS contact number and application role.
-This data would normally reside in multiple tables within a database but can be simulated with a python dictionary
+User account database records will contain usernames,salted passwords, encrypted 
+SMS contact numbers and the application role for each user. This data would normally 
+reside within multiple database tables but can be simulated with a python dictionary.
 
-Global threat intellignce services such as reputation list checking are often used to
+Global threat intellignce services such as reputation list checking are often used to 
 shun traffic from known malicious sources quickly at the network layer, reducing the 
 application load by avoiding needlessly validating untrusted source input data that is
-almost certainly intended to attack the system.  
+almost certainly intended to attack the system. 
+
+The following additional python modules are required for both security controls and user
+experience improvements. The packages are known to install without issue using pip for python 3
+
+pytimedinput, https://pypi.org/project/pytimedinput/
+bcrypt, https://pypi.org/project/bcrypt/
+stdiomask, https://pypi.org/project/stdiomask/
+cryptography, https://pypi.org/project/cryptography/
+
 '''
 
 # User account database data 
@@ -39,7 +49,7 @@ ipreputationlist=["202.192.34.106","138.197.141.172","121.74.25.77","49.233.155.
 def testsourceip(thisip):
     if thisip in ipreputationlist:
         print("WAF termination based on IP reputation list")
-        logheader=getlogheader("waf1","wafdaemon[12345","session-not-set")
+        logheader=getlogheader("waf1","wafdaemon[12345]","session-not-set")
         logmessage = logheader + " Msgid 666 (IP reputationlist match) connection dropped from IP {}".format(thisip)
         print("------------- Security event monitoring control------------------- ")
         print("The following suspicous active log will be forwared to Queens security monitoring services:")
@@ -86,10 +96,13 @@ def updatesessiontracker(sessionid):
         sessiontracker[sessionid]=1
     return
 
-def deletesession(sessionid,sessiondatabase):
+def deletesession(sessionid):
     message="Control 6.1: Active session identifier {} destroyed to force reauthentication prior to permitting application access".format(sessionid)
-    sessiondatabase.pop(sessionid)
-    controldisplay(message)
+    try:
+        sessiontracker.pop(sessionid)
+        controldisplay(message)
+    except KeyError:
+        pass
     return
 
 def getfailedlogincount(sessionid):
@@ -216,7 +229,7 @@ def controldisplay(message):
         time.sleep(count)
     return
 
-def mfacodeprompt(mfacode,sessionid,sessiondb):
+def mfacodeprompt(mfacode,sessionid):
     failcount=0
     while failcount < 6:
         # using third party module for the timer
@@ -232,9 +245,9 @@ def mfacodeprompt(mfacode,sessionid,sessiondb):
                 pass
         else:
             print("MFA code incorrect or expired")
-            deletesession(sessionid,sessiondb)
+            deletesession(sessionid)
             failcount=6
-    deletesession(sessionid,sessiondb)    
+    deletesession(sessionid)    
     return False
 
 def getuserrbac(username,sessionid):
@@ -338,7 +351,7 @@ if __name__ == "__main__":
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
             # Start a while loop and wait for 120 seconds, if no match exit, write failed MFA login to log
-            mfaresult=mfacodeprompt(mfacode,thissession,sessiontracker)
+            mfaresult=mfacodeprompt(mfacode,thissession)
             if mfaresult:
                 eneablemenu=True
                 break
@@ -360,6 +373,6 @@ if __name__ == "__main__":
         print("------------- Security event monitoring control------------------- ")
         print("The following application activity will be forwarded to Queens security monitoring services:")
         print(logmessage)
-        deletesession(thissession,sessiontracker)
+        deletesession(thissession)
         print("\n################ ASMIS control prototype complete ################")
         exit(0)    
