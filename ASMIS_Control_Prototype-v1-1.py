@@ -109,6 +109,7 @@ def getlogheader(hostname,programid,sessionid):
 def newsuspiciousactivity(sessionid,username):
     logheader=getlogheader("web1","ASMIS_Login[12345]",sessionid)
     logmessage = logheader + "Multiple failed authentication attempts for username {}".format(username)
+    print("------------------ user message -----------------")
     print("You appear to be having trouble logging in, please contact Queens Medical Centre at 1-800-555-1212 for assistance")
     print("Goodbye\n")
     print("------------- Security event monitoring control------------------- ")
@@ -120,6 +121,7 @@ def newsuspiciousactivity(sessionid,username):
 def newfailedlogin(sessionid,username):
     logdata=getlogheader("web1","ASMIS_Login[12345]",sessionid)
     logmessage=logdata + "Multifactor authentication failure for username {}".format(username)
+    print("------------------ user message -----------------")
     print("Please retry the multifactor authentication, if problems persist contact Queens Medical Centre at 1-800-555-1212 for assistance")
     print("Goodbye\n")
     print("------------- Security event monitoring control------------------- ")
@@ -332,7 +334,7 @@ if __name__ == "__main__":
             # To retrieve the SMS contact associated with the valid username it must be decrypted 
             keylist=getsecrets()
             smscontact=getsmscontact(validlogin[1],keylist[1])
-            message="Control 4: Multifactor authentication using stored data for useraccount {} ".format(validlogin[1])
+            message="Control 4: Multifactor authentication using stored data for user account {} ".format(validlogin[1])
             controldisplay(message)
             mfacode=newsmsmessage(smscontact)
             # Start a while loop and wait for 120 seconds, if no match exit, write failed MFA login to log
