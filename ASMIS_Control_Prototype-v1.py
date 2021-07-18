@@ -39,11 +39,12 @@ ipreputationlist=["202.192.34.106","138.197.141.172","121.74.25.77","49.233.155.
 def testsourceip(thisip):
     if thisip in ipreputationlist:
         print("WAF termination based on IP reputation list")
-        timestamp=datetime.datetime.now().isoformat("T","seconds") 
-        hostname="waf1" # would capture hostname of computer reporting log
-        programid="wafdaemon[12345]" # would capture program name and PID
-        logmessage=timestamp + " " + hostname + " " + programid + ": " + \
-            "Msgid 666 (IP reputationlist match) connection dropped from IP {}".format(thisip)
+        logheader=getlogheader("waf1","wafdaemon[12345","session-not-set")
+        #timestamp=datetime.datetime.now().isoformat("T","seconds") 
+        #hostname="waf1" # would capture hostname of computer reporting log
+        #programid="wafdaemon[12345]" # would capture program name and PID
+        #logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+        logmessage = logheader + " Msgid 666 (IP reputationlist match) connection dropped from IP {}".format(thisip)
         print("------------- Security event monitoring control------------------- ")
         print("The following suspicous active log will be forwared to Queens security monitoring services:")
         print(logmessage)
@@ -106,18 +107,20 @@ def getlogheader(hostname,programid,sessionid):
     thishostname=hostname
     thisprogramid=programid
     thissessionid= sessionid
-    logdata=timestamp + " " + thishostname + " " + thisprogramid + ": session {} from source ip {} ".format(thissessionid,thisip)
+    logdata=timestamp + " " + thishostname + " " + thisprogramid + ": session {} from source ip {}, ".format(thissessionid,thisip)
     return logdata
 
-def newsuspiciousactivity(sessionid,uname):
+def newsuspiciousactivity(sessionid,username):
+    logheader=getlogheader("web1","ASMIS_Login[12345]",sessionid)
     # Log format, 
     # Timestamp Webserver-Hostname asmisprogram: Multiple failed authentication attemps for <sessionid> from <IP>
-    timestamp=datetime.datetime.now().isoformat("T","seconds")
-    thisip=getip()
-    hostname="web1" # would capture hostname of computer reporting log
-    programid="ASMIS_Login[12345]" # would capture program name and PID
-    logmessage=timestamp + " " + hostname + " " + programid + ": " + \
-            "Multiple failed authentication attempts for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
+    #timestamp=datetime.datetime.now().isoformat("T","seconds")
+    #thisip=getip()
+    #hostname="web1" # would capture hostname of computer reporting log
+    #programid="ASMIS_Login[12345]" # would capture program name and PID
+    #logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+    logmessage = logheader + "Multiple failed authentication attempts for username {}".format(username)
+    #" Multiple failed authentication attempts for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
     print("You appear to be having trouble logging in, please contact Queens Medical Centre at 1-800-555-1212 for assistance")
     print("Goodbye\n")
     print("------------- Security event monitoring control------------------- ")
@@ -126,13 +129,15 @@ def newsuspiciousactivity(sessionid,uname):
     exit(1)
     return
 
-def newfailedlogin(sessionid,uname):
-    timestamp=datetime.datetime.now().isoformat("T","seconds")
-    thisip=getip()
-    hostname="web1" # would capture hostname of computer reporting log
-    programid="ASMIS_Login[12345]" # would capture program name and PID
-    logmessage=timestamp + " " + hostname + " " + programid + ": " + \
-        "Multifactor authentication failure for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
+def newfailedlogin(sessionid,username):
+    logdata=getlogheader("web1","ASMIS_Login[12345]",sessionid)
+    #timestamp=datetime.datetime.now().isoformat("T","seconds")
+    #thisip=getip()
+    #hostname="web1" # would capture hostname of computer reporting log
+    #programid="ASMIS_Login[12345]" # would capture program name and PID
+    #logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+    #    "Multifactor authentication failure for {} from IP {} and the following username: {}".format(sessionid,thisip,uname)
+    logmessage=logdata + "Multifactor authentication failure for username {}".format(username)
     print("Please retry the multifactor authentication, if problems persist contact Queens Medical Centre at 1-800-555-1212 for assistance")
     print("Goodbye\n")
     print("------------- Security event monitoring control------------------- ")
@@ -148,7 +153,6 @@ def testusername(uname,sessionid):
         newsuspiciousactivity(sessionid,uname)
     else:
         charwhitelist=set(string.ascii_letters + string.digits + "'"+".")
-        #print("Control 1: Confirm only whitelisted characters are in the following username {}".format(uname))
         message="Control 1: Confirm only whitelisted characters are in the following username {}".format(uname)
         controldisplay(message)
         # Use set compression just like list, break test into two parts to make code easier to follow  
@@ -243,7 +247,7 @@ def mfacodeprompt(mfacode):
             failcount=6    
     return False
 
-def getuserrbac(username):
+def getuserrbac(username,sessionid):
     rbaccodestr=recordsdictionary[username][2]
     # if value is empty or something other than an integer force to an invalid int option to maintain error handing logic
     try:
@@ -263,12 +267,14 @@ def getuserrbac(username):
     else:
         message="Control 5: Deny access, no role has been assigned for user {}".format(username)
         # Log this condition of user with unassigned role
-        timestamp=datetime.datetime.now().isoformat("T","seconds")
-        thisip=getip()
-        hostname="app1" # would capture hostname of computer reporting log
-        programid="ASMIS_Menu[12345]" # would capture program name and PID
-        logmessage=timestamp + " " + hostname + " " + programid + ": " + \
-            "Invalid RBAC role assigned to following username: {}".format(username)
+        logdata=getlogheader("app1","ASMIS_Menu[12345]",sessionid)
+        #timestamp=datetime.datetime.now().isoformat("T","seconds")
+        #thisip=getip()
+        #hostname="app1" # would capture hostname of computer reporting log
+        #programid="ASMIS_Menu[12345]" # would capture program name and PID
+        #logmessage=timestamp + " " + hostname + " " + programid + ": " + \
+        #    "Invalid RBAC role assigned to following username: {}".format(username)
+        logmessage=logdata + "Invalid RBAC role assigned to following username: {}".format(username)    
         print("------------- Security event monitoring control------------------- ")
         print("The following suspicous activity log will be forwared to Queens security monitoring services:")
         print(logmessage)
@@ -350,7 +356,7 @@ if __name__ == "__main__":
             print("You have " + str(7 - failedlogincount) + " attempts remaining")
     # Limit menu functionality to users who have successfully met MFA, end program when they exit the menu
     if eneablemenu:
-        rbacrole=getuserrbac(validlogin[1])
+        rbacrole=getuserrbac(validlogin[1],thissession)
         newrbacmenu(rbacrole,validlogin[1],thissession,sessiontracker)
         eneablemenu=False
         # Log this condition of user with unassigned role
