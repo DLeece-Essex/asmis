@@ -245,7 +245,13 @@ def mfacodeprompt(mfacode):
 
 def getuserrbac(username):
     rbaccodestr=recordsdictionary[username][2]
-    rbaccode=int(rbaccodestr)
+    # if value is empty or something other than an integer force to an invalid int option to maintain error handing logic
+    try:
+        rbaccode=int(rbaccodestr)
+    except ValueError:
+        rbaccode=99
+        pass
+    
     if rbaccode==1:
         message="Control 5: Identified access role assigned for the user {} is patient".format(username)
     elif rbaccode==2:
@@ -267,7 +273,7 @@ def getuserrbac(username):
         print("The following suspicous activity log will be forwared to Queens security monitoring services:")
         print(logmessage)
     controldisplay(message)
-    return
+    return rbaccode
 
 def newrbacmenu(role,username,sessionid,sessiondb):
     message="Control 5.1: Access to application requires valid authentication. This status will be tracked with session identifier {}".format(sessionid)
